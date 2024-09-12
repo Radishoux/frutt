@@ -154,7 +154,6 @@ const EditArticlePage: React.FC = () => {
           )}
         </div>
 
-        {/* Tags Section */}
         <div className="mb-3">
           <label htmlFor="tags" className="form-label">Tags (comma-separated)</label>
           <input

@@ -104,9 +104,9 @@ const HomePage: React.FC = () => {
         </Link>
       </div>
 
-      {/* Search, Sort, and Tag Filters Controls */}
+
       <div className="d-flex justify-content-between align-items-center mb-4">
-        {/* Search Bar */}
+
         <input
           type="text"
           className="form-control me-2"
@@ -115,7 +115,7 @@ const HomePage: React.FC = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
 
-        {/* Sort Dropdown */}
+
         <select
           className="form-select me-2"
           value={sortOption}
@@ -128,7 +128,7 @@ const HomePage: React.FC = () => {
           <option value="price-desc">Price (Highest to Lowest)</option>
         </select>
 
-        {/* Filter by Tags Button */}
+
         <button
           className="btn btn-outline-primary"
           type="button"
@@ -138,7 +138,7 @@ const HomePage: React.FC = () => {
         </button>
       </div>
 
-      {/* Selected Tags Display */}
+
       {selectedTags.size > 0 && (
         <div className="mb-4">
           <h5>Selected Tags:</h5>
@@ -150,7 +150,7 @@ const HomePage: React.FC = () => {
         </div>
       )}
 
-      {/* Tag Drawer */}
+
       <div
         className={`offcanvas offcanvas-end ${showTagDrawer ? 'show' : ''}`}
         tabIndex={-1}
@@ -188,7 +188,7 @@ const HomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Articles Display */}
+
       <div className="row">
         {filteredArticles.map((article) => (
           <div className="col-md-4 mb-4" key={article.id}>

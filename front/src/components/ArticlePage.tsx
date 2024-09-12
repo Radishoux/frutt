@@ -42,7 +42,7 @@ const ArticlePage: React.FC = () => {
 
   return (
     <div className="container mt-4">
-      {/* Back to Homepage Button */}
+
       <button className="btn btn-secondary mb-4" onClick={() => navigate('/')}>
         Back to Homepage
       </button>
@@ -52,7 +52,7 @@ const ArticlePage: React.FC = () => {
       </button>
 
       <div className="row">
-        {/* Left Column: Image */}
+
         <div className="col-md-6">
           <img
             src={article.image}
@@ -61,15 +61,24 @@ const ArticlePage: React.FC = () => {
           />
         </div>
 
-        {/* Right Column: Title, Price, Add to Cart, Description */}
+
         <div className="col-md-6">
           <h2>{article.title}</h2>
-          <p className="h4 text-danger">€{Number(article.price).toFixed(2)}</p> {/* Display price in a prominent style */}
+          <p className="h4 text-danger">€{Number(article.price).toFixed(2)}</p>
           <button className="btn btn-success mb-3">Add to Cart</button>
           <div>
             <h4>Description</h4>
             <p>{article.description}</p>
           </div>
+        </div>
+
+        <div className="col-md-12">
+          <h4>Tags</h4>
+          <ul>
+            {article.tags.map((tag) => (
+              <li key={tag}>{tag}</li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>
