@@ -31,11 +31,14 @@ export const getAllArticles = async (req: Request, res: Response) => {
   }
 };
 
-export const getArticleById = async (req: Request, res: Response) => {
+export const getArticleById = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   try {
     const [articles] = await pool.query<ArticleRow[]>('SELECT * FROM articles WHERE id = ?', [id]);
-    if (articles.length === 0) return res.status(404).json({ message: 'Article not found' });
+    if (articles.length === 0) {
+      res.status(404).json({ message: 'Article not found' });
+      return
+    }
 
     const [tags] = await pool.query<TagRow[]>(
       'SELECT name FROM tags INNER JOIN article_tags ON tags.id = article_tags.tag_id WHERE article_tags.article_id = ?',
@@ -53,7 +56,7 @@ export const getArticleById = async (req: Request, res: Response) => {
   }
 };
 
-export const createArticle = async (req: Request, res: Response) => {
+export const createArticle = async (req: Request, res: Response): Promise<void> => {
   const { title, description, price, image, tags } = req.body;
   try {
     const [result] = await pool.query<OkPacket>(
@@ -77,11 +80,11 @@ export const createArticle = async (req: Request, res: Response) => {
 
     res.status(201).json({ message: 'Article created', articleId });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to create article' });
+    res.status(500).json({ error: 'Failed to create article', message: error });
   }
 };
 
-export const updateArticle = async (req: Request, res: Response) => {
+export const updateArticle = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   const { title, description, price, image, tags } = req.body;
   try {
@@ -90,7 +93,10 @@ export const updateArticle = async (req: Request, res: Response) => {
       [title, description, price, image, id]
     );
 
-    if (result.affectedRows === 0) return res.status(404).json({ message: 'Article not found' });
+    if (result.affectedRows === 0) {
+      res.status(404).json({ message: 'Article not found' });
+      return
+    }
 
     await pool.query('DELETE FROM article_tags WHERE article_id = ?', [id]);
 
@@ -112,11 +118,14 @@ export const updateArticle = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteArticle = async (req: Request, res: Response) => {
+export const deleteArticle = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   try {
     const [result] = await pool.query<OkPacket>('DELETE FROM articles WHERE id = ?', [id]);
-    if (result.affectedRows === 0) return res.status(404).json({ message: 'Article not found' });
+    if (result.affectedRows === 0) {
+      res.status(404).json({ message: 'Article not found' });
+      return
+    }
 
     res.json({ message: 'Article deleted' });
   } catch (error) {
