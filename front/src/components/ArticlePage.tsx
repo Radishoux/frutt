@@ -7,15 +7,15 @@ interface Article {
   title: string;
   description: string;
   price: number;
-  image: string; // Base64 string for the image
+  image: string;
   tags: string[];
 }
 
 const ArticlePage: React.FC = () => {
-  const { id } = useParams<{ id: string }>(); // Get article ID from the URL
+  const { id } = useParams<{ id: string }>();
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchArticle = async () => {
@@ -32,19 +32,6 @@ const ArticlePage: React.FC = () => {
     fetchArticle();
   }, [id]);
 
-  const handleDelete = async () => {
-    if (!id) return;
-
-    try {
-      await axios.delete(`http://localhost:5000/api/articles/${id}`);
-      alert('Article deleted successfully!');
-      navigate('/'); // Redirect to homepage after deletion
-    } catch (error) {
-      console.error('Failed to delete article:', error);
-      alert('Failed to delete article. Please try again.');
-    }
-  };
-
   if (loading) {
     return <div className="container mt-4">Loading...</div>;
   }
@@ -59,6 +46,10 @@ const ArticlePage: React.FC = () => {
       <button className="btn btn-secondary mb-4" onClick={() => navigate('/')}>
         Back to Homepage
       </button>
+      <br />
+      <button className="btn btn-primary mb-4" onClick={() => navigate(`/edit/${id}`)}>
+        Edit article
+      </button>
 
       <div className="row">
         {/* Left Column: Image */}
@@ -66,7 +57,7 @@ const ArticlePage: React.FC = () => {
           <img
             src={article.image}
             alt={article.title}
-            className="img-fluid" // Bootstrap class for responsive images
+            className="img-fluid"
           />
         </div>
 
@@ -79,10 +70,6 @@ const ArticlePage: React.FC = () => {
             <h4>Description</h4>
             <p>{article.description}</p>
           </div>
-          {/* Delete Button */}
-          <button className="btn btn-danger mt-3" onClick={handleDelete}>
-            Delete Article
-          </button>
         </div>
       </div>
     </div>

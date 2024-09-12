@@ -1,9 +1,8 @@
 import { Request, Response } from 'express';
-import { RowDataPacket, OkPacket } from 'mysql2'; // Import necessary types from mysql2
+import { RowDataPacket, OkPacket } from 'mysql2';
 import pool from '../config/db';
 import { Article } from '../models/article';
 
-// Define custom RowDataPacket types for Articles and Tags
 type ArticleRow = Article & RowDataPacket;
 type TagRow = { name: string } & RowDataPacket;
 
@@ -20,7 +19,7 @@ export const getAllArticles = async (req: Request, res: Response) => {
 
         return {
           ...article,
-          tags: tags.map(tag => tag.name), // Extract tag names from rows
+          tags: tags.map(tag => tag.name),
         };
       })
     );
