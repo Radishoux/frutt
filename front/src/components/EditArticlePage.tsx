@@ -19,6 +19,8 @@ const EditArticlePage: React.FC = () => {
   const [description, setDescription] = useState<string>('');
   const [price, setPrice] = useState<string>('');
   const [image, setImage] = useState<string | null>(null);
+  const [tags, setTags] = useState<string[]>([]);
+  const [newTag, setNewTag] = useState<string>('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,6 +32,7 @@ const EditArticlePage: React.FC = () => {
         setDescription(response.data.description);
         setPrice(response.data.price.toString());
         setImage(response.data.image);
+        setTags(response.data.tags);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching article:', error);
@@ -39,6 +42,30 @@ const EditArticlePage: React.FC = () => {
 
     fetchArticle();
   }, [id]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleAddTag = () => {
+    if (newTag.trim() === '') return;
+
+    const newTags = newTag.split(',').map(tag => tag.trim());
+    setTags([...tags, ...newTags]);
+    setNewTag('');
+  };
+
+  const handleRemoveTag = (index: number) => {
+    const updatedTags = tags.filter((_, i) => i !== index);
+    setTags(updatedTags);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,6 +81,7 @@ const EditArticlePage: React.FC = () => {
         description,
         price: parseFloat(price),
         image,
+        tags,
       });
 
       alert('Article updated successfully!');
@@ -113,10 +141,48 @@ const EditArticlePage: React.FC = () => {
           />
         </div>
         <div className="mb-3">
+          <label htmlFor="image" className="form-label">Upload Image</label>
+          <input
+            type="file"
+            className="form-control"
+            id="image"
+            accept="image/*"
+            onChange={handleImageChange}
+          />
           {image && (
             <img src={image} alt="Preview" className="img-fluid mt-3" style={{ maxWidth: '200px' }} />
           )}
         </div>
+
+        {/* Tags Section */}
+        <div className="mb-3">
+          <label htmlFor="tags" className="form-label">Tags (comma-separated)</label>
+          <input
+            type="text"
+            className="form-control"
+            id="tags"
+            value={newTag}
+            onChange={(e) => setNewTag(e.target.value)}
+          />
+          <button type="button" className="btn btn-secondary mt-2" onClick={handleAddTag}>
+            Add Tags
+          </button>
+          <div className="mt-3">
+            {tags.map((tag, index) => (
+              <span key={index} className="badge bg-primary me-2">
+                {tag}
+                <button
+                  type="button"
+                  className="btn btn-sm btn-danger ms-1"
+                  onClick={() => handleRemoveTag(index)}
+                >
+                  x
+                </button>
+              </span>
+            ))}
+          </div>
+        </div>
+
         <button type="submit" className="btn btn-primary">Update Article</button>
       </form>
     </div>

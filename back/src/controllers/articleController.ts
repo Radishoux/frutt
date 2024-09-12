@@ -86,6 +86,7 @@ export const createArticle = async (req: Request, res: Response): Promise<void> 
 export const updateArticle = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   const { title, description, price, image, tags } = req.body;
+
   try {
     const [result] = await pool.query<OkPacket>(
       'UPDATE articles SET title = ?, description = ?, price = ?, image = ? WHERE id = ?',
@@ -94,19 +95,26 @@ export const updateArticle = async (req: Request, res: Response): Promise<void> 
 
     if (result.affectedRows === 0) {
       res.status(404).json({ message: 'Article not found' });
-      return
+      return;
     }
 
     await pool.query('DELETE FROM article_tags WHERE article_id = ?', [id]);
 
     if (tags && Array.isArray(tags)) {
       for (const tag of tags) {
-        const [tagResult] = await pool.query<OkPacket>(
-          'INSERT IGNORE INTO tags (name) VALUES (?)',
-          [tag]
-        );
+        const [existingTag] = await pool.query<RowDataPacket[]>('SELECT id FROM tags WHERE name = ?', [tag]);
 
-        const tagId = tagResult.insertId;
+        let tagId;
+        if (existingTag.length > 0) {
+          tagId = existingTag[0].id;
+        } else {
+          const [tagResult] = await pool.query<OkPacket>(
+            'INSERT INTO tags (name) VALUES (?)',
+            [tag]
+          );
+          tagId = tagResult.insertId;
+        }
+
         await pool.query('INSERT INTO article_tags (article_id, tag_id) VALUES (?, ?)', [id, tagId]);
       }
     }

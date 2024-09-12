@@ -16,14 +16,20 @@ const HomePage: React.FC = () => {
   const [filteredArticles, setFilteredArticles] = useState<Article[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [sortOption, setSortOption] = useState<string>('');
+  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [showTagDrawer, setShowTagDrawer] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchArticles = async () => {
       try {
         const response = await axios.get<Article[]>('http://localhost:5000/api/articles');
-        console.log(response.data);
         setArticles(response.data);
         setFilteredArticles(response.data);
+
+
+        const tags = Array.from(new Set(response.data.flatMap((article) => article.tags)));
+        setAvailableTags(tags);
       } catch (error) {
         console.error('Error fetching articles:', error);
       }
@@ -34,15 +40,25 @@ const HomePage: React.FC = () => {
 
 
   useEffect(() => {
-    const filtered = articles.filter((article) =>
+    let filtered = articles.filter((article) =>
       article.title.toLowerCase().startsWith(searchTerm.toLowerCase())
     );
+
+
+    if (selectedTags.size > 0) {
+      filtered = filtered.filter((article) =>
+        article.tags.some((tag) => selectedTags.has(tag))
+      );
+    }
+
     setFilteredArticles(filtered);
-  }, [searchTerm, articles]);
+    setSortOption('');
+  }, [searchTerm, selectedTags, articles]);
 
 
   useEffect(() => {
-    const sortedArticles = [...filteredArticles];
+    // eslint-disable-next-line prefer-const
+    let sortedArticles = [...filteredArticles];
 
     switch (sortOption) {
       case 'title-asc':
@@ -64,6 +80,21 @@ const HomePage: React.FC = () => {
     setFilteredArticles(sortedArticles);
   }, [sortOption]);
 
+
+  const handleTagSelection = (tag: string) => {
+    const newSelectedTags = new Set(selectedTags);
+    if (selectedTags.has(tag)) {
+      newSelectedTags.delete(tag);
+    } else {
+      newSelectedTags.add(tag);
+    }
+    setSelectedTags(newSelectedTags);
+  };
+
+  const toggleTagDrawer = () => {
+    setShowTagDrawer(!showTagDrawer);
+  };
+
   return (
     <div className="container mt-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
@@ -73,7 +104,7 @@ const HomePage: React.FC = () => {
         </Link>
       </div>
 
-      {/* Search and Sort Controls */}
+      {/* Search, Sort, and Tag Filters Controls */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         {/* Search Bar */}
         <input
@@ -86,7 +117,7 @@ const HomePage: React.FC = () => {
 
         {/* Sort Dropdown */}
         <select
-          className="form-select"
+          className="form-select me-2"
           value={sortOption}
           onChange={(e) => setSortOption(e.target.value)}
         >
@@ -96,6 +127,65 @@ const HomePage: React.FC = () => {
           <option value="price-asc">Price (Lowest to Highest)</option>
           <option value="price-desc">Price (Highest to Lowest)</option>
         </select>
+
+        {/* Filter by Tags Button */}
+        <button
+          className="btn btn-outline-primary"
+          type="button"
+          onClick={toggleTagDrawer}
+        >
+          Filter by Tags
+        </button>
+      </div>
+
+      {/* Selected Tags Display */}
+      {selectedTags.size > 0 && (
+        <div className="mb-4">
+          <h5>Selected Tags:</h5>
+          {[...selectedTags].map((tag) => (
+            <span key={tag} className="badge bg-primary me-2">
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Tag Drawer */}
+      <div
+        className={`offcanvas offcanvas-end ${showTagDrawer ? 'show' : ''}`}
+        tabIndex={-1}
+        id="tagDrawer"
+        style={{ visibility: showTagDrawer ? 'visible' : 'hidden' }}
+        aria-labelledby="tagDrawerLabel"
+      >
+        <div className="offcanvas-header">
+          <h5 className="offcanvas-title" id="tagDrawerLabel">
+            Filter by Tags
+          </h5>
+          <button
+            type="button"
+            className="btn-close text-reset"
+            aria-label="Close"
+            onClick={toggleTagDrawer}
+          ></button>
+        </div>
+        <div className="offcanvas-body">
+          {availableTags.map((tag) => (
+            <div key={tag} className="form-check">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                value={tag}
+                id={`tag-${tag}`}
+                checked={selectedTags.has(tag)}
+                onChange={() => handleTagSelection(tag)}
+              />
+              <label className="form-check-label" htmlFor={`tag-${tag}`}>
+                {tag}
+              </label>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Articles Display */}
