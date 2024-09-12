@@ -202,11 +202,12 @@ const HomePage: React.FC = () => {
               </Link>
               <div className="card-body">
                 <h5 className="card-title">{article.title}</h5>
-                <p className="card-text">{article.description}</p>
+                <p className="card-text">{article.description.substring(0, 50)} {article.description.length > 50 ? "..." : ""}</p>
+
                 <p className="card-text">
                   <strong>€{Number(article.price).toFixed(2)}</strong>
                 </p>
-                <button className="btn btn-warning mt-2">Add to Cart</button>
+                <button className="btn btn-warning mt-2" onClick={() => alert(`You just bought ${article.title}`)}>Buy !</button>
               </div>
             </div>
           </div>
