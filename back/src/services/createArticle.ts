@@ -3,13 +3,9 @@ import { OkPacket } from 'mysql2';
 import pool from '../config/db';
 
 export const createArticle = async (req: Request, res: Response): Promise<void> => {
-  const { title, description, price, image, tags } = req.body;
+  const { title, description, price, image} = req.body;
   if (!title || !description || !price || !image) {
     res.status(400).json({ error: 'Missing required fields' });
-    return;
-  }
-  if (typeof price !== 'number' || !/^\d+(\.\d{1,2})?$/.test(price.toString())) {
-    res.status(400).json({ error: 'Price must be a number with a maximum of 2 decimal places' });
     return;
   }
   if (price <= 0) {
@@ -28,18 +24,6 @@ export const createArticle = async (req: Request, res: Response): Promise<void> 
     );
 
     const articleId = result.insertId;
-
-    if (tags && Array.isArray(tags)) {
-      for (const tag of tags) {
-        const [tagResult] = await pool.query<OkPacket>(
-          'INSERT IGNORE INTO tags (name) VALUES (?)',
-          [tag]
-        );
-
-        const tagId = tagResult.insertId;
-        await pool.query('INSERT INTO article_tags (article_id, tag_id) VALUES (?, ?)', [articleId, tagId]);
-      }
-    }
 
     res.status(201).json({ message: 'Article created', articleId });
   } catch (error) {

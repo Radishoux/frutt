@@ -32,6 +32,15 @@ const ArticlePage: React.FC = () => {
     fetchArticle();
   }, [id]);
 
+  const handleDelete = async () => {
+    try {
+      await axios.delete(`http://localhost:5000/api/articles/${id}`);
+      navigate('/');
+    } catch (error) {
+      console.error('Error deleting article:', error);
+    }
+  };
+
   if (loading) {
     return <div className="container mt-4">Loading...</div>;
   }
@@ -80,6 +89,8 @@ const ArticlePage: React.FC = () => {
             ))}
           </ul>
         </div>
+        <button onClick={handleDelete} className="btn btn-danger mt-4">Delete Article</button>
+
       </div>
     </div>
   );
